@@ -67,6 +67,10 @@ const intervalCallback = () => {
       const filteredArticles = data.articles.filter(
         (article) => article.local_date_of_pub_date == dateString
       );
+      if (filteredArticles.length == 0) {
+        console.log("today lunch is undefined");
+        return;
+      }
       const authors = ["조식", "중식", "석식"];
 
       const orderedArticles = filteredArticles.sort(
