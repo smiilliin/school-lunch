@@ -56,8 +56,6 @@ const intervalCallback = () => {
     if (lastDate == dateString) return;
   }
 
-  fs.writeFileSync("last.txt", dateString);
-
   console.log("try upload");
   fetch(
     `https://school.iamservice.net/api/article/organization/${process.env.SCHOOL_ID}?next_token=0`
@@ -103,6 +101,10 @@ const intervalCallback = () => {
       });
 
       console.log(publishResult);
+
+      if (publishResult?.status == "ok") {
+        fs.writeFileSync("last.txt", dateString);
+      }
     })
     .catch((err) => console.error(err));
 };
