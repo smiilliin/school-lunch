@@ -62,12 +62,21 @@ const intervalCallback = () => {
   )
     .then((data) => data.json())
     .then(async (data) => {
-      const filteredArticles = data.articles.filter(
+      let filteredArticles = data.articles.filter(
         (article) => article.local_date_of_pub_date == dateString
       );
       if (filteredArticles.length == 0) {
-        console.log("today lunch is undefined");
-        return;
+        try {
+					const tempData = JSON.parse(fs.readFileSync("temp.json").toString());
+					filteredArticles = tempData.filter((article) => article.date == dateString);
+				} catch (err) {
+					console.error(err);
+				}
+
+				if (filteredArticles.length == 0) {
+					console.log("today lunch is undefined");
+        	return;
+				}
       }
       const authors = ["조식", "중식", "석식"];
 
