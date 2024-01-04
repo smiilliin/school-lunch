@@ -44,11 +44,13 @@ const writeImage = (title, content, date) => {
     PImage.encodeJPEGToStream(image, stream);
   });
 };
-const intervalCallback = () => {
+const intervalCallback = async () => {
   const date = new Date();
-  const dateString = `${date.getFullYear()}.${date.getMonth() + 1}.${(
-    "00" + date.getDate()
-  ).slice(-2)}`;
+  const dateString = `${date.getFullYear()}.${(
+    "00" +
+    date.getMonth() +
+    1
+  ).slice(-2)}.${("00" + date.getDate()).slice(-2)}`;
 
   if (fs.existsSync("last.txt")) {
     const lastDate = fs.readFileSync("last.txt").toString();
@@ -56,66 +58,85 @@ const intervalCallback = () => {
     if (lastDate == dateString) return;
   }
 
-  console.log("try upload");
-  fetch(
-    `https://school.iamservice.net/api/article/organization/${process.env.SCHOOL_ID}?next_token=0`
-  )
-    .then((data) => data.json())
-    .then(async (data) => {
-      let filteredArticles = data.articles.filter(
-        (article) => article.local_date_of_pub_date == dateString
-      );
+  console.log("try fetch");
+  const dataCallback = async (data, token) => {
+    let filteredArticles = data.articles.filter(
+      (article) => article.local_date_of_pub_date == dateString
+    );
+    console.log(dateString);
+    if (filteredArticles.length == 0) {
+      try {
+        const tempData = JSON.parse(fs.readFileSync("temp.json").toString());
+        filteredArticles = tempData.filter(
+          (article) => article.date == dateString
+        );
+      } catch (err) {
+        console.error(err);
+      }
+
       if (filteredArticles.length == 0) {
-        try {
-					const tempData = JSON.parse(fs.readFileSync("temp.json").toString());
-					filteredArticles = tempData.filter((article) => article.date == dateString);
-				} catch (err) {
-					console.error(err);
-				}
-
-				if (filteredArticles.length == 0) {
-					console.log("today lunch is undefined");
-        	return;
-				}
+        console.log(`${token}token lunch is undefined`);
+        return false;
       }
-      const authors = ["조식", "중식", "석식"];
+    }
+    const authors = ["조식", "중식", "석식"];
 
-      const orderedArticles = filteredArticles.sort(
-        (a, b) => authors.indexOf(a.author) - authors.indexOf(b.author)
-      );
-      const simplicatedArticles = orderedArticles.map((x) => {
+    const orderedArticles = filteredArticles.sort(
+      (a, b) => authors.indexOf(a.author) - authors.indexOf(b.author)
+    );
+    const simplicatedArticles = orderedArticles.map((x) => {
+      return {
+        title: x.title,
+        content: x.content,
+        date: dateString,
+      };
+    });
+
+    console.log("uploading");
+    const ig = new IgApiClient();
+    ig.state.generateDevice(process.env.ID);
+
+    await ig.account.login(process.env.ID, process.env.PASSWORD);
+
+    const items = await Promise.all(
+      simplicatedArticles.map(async (x) => {
         return {
-          title: x.title,
-          content: x.content,
-          date: dateString,
+          file: await writeImage(x.title, x.content, x.date),
         };
-      });
+      })
+    );
 
-      const ig = new IgApiClient();
-      ig.state.generateDevice(process.env.ID);
+    const publishResult = await ig.publish.album({
+      items: items,
+      caption: `급식(${dateString})`,
+    });
 
-      await ig.account.login(process.env.ID, process.env.PASSWORD);
+    console.log(publishResult);
 
-      const items = await Promise.all(
-        simplicatedArticles.map(async (x) => {
-          return {
-            file: await writeImage(x.title, x.content, x.date),
-          };
-        })
+    if (publishResult?.status == "ok") {
+      fs.writeFileSync("last.txt", dateString);
+      return true;
+    }
+    return false;
+  };
+
+  let token = 0;
+  for (let i = 0; i < 8; i++) {
+    try {
+      const raw = await fetch(
+        `https://school.iamservice.net/api/article/organization/${process.env.SCHOOL_ID}?next_token=${token}`
       );
+      const data = await raw.json();
 
-      const publishResult = await ig.publish.album({
-        items: items,
-        caption: `급식(${dateString})`,
-      });
-
-      console.log(publishResult);
-
-      if (publishResult?.status == "ok") {
-        fs.writeFileSync("last.txt", dateString);
+      if (await dataCallback(data, token)) {
+        break;
       }
-    })
-    .catch((err) => console.error(err));
+
+      token = data.next_token;
+    } catch (err) {
+      console.error(err);
+    }
+  }
 };
 
 intervalCallback();
