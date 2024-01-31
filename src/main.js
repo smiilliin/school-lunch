@@ -48,8 +48,7 @@ const intervalCallback = async () => {
   const date = new Date();
   const dateString = `${date.getFullYear()}.${(
     "00" +
-    date.getMonth() +
-    1
+    (date.getMonth() + 1)
   ).slice(-2)}.${("00" + date.getDate()).slice(-2)}`;
 
   if (fs.existsSync("last.txt")) {
