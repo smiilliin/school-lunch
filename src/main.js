@@ -45,7 +45,7 @@ const writeImage = (title, content, date) => {
   });
 };
 const intervalCallback = async () => {
-  const date = new Date();
+  const date = new Date(Date.now() + 1000 * 60 * 60 * 2);
   const dateString = `${date.getFullYear()}.${(
     "00" +
     (date.getMonth() + 1)
