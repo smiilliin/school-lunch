@@ -10,12 +10,13 @@ Install packages
 npm install
 ```
 
-Input Instagram account and "아이엠스쿨" school ID
+Input Instagram account and "아이엠스쿨" school ID, article group id
 
 ```env
 ID=(Instagram ID)
 PASSWORD=(Password)
 SCHOOL_ID=(School ID)
+GROUP=(Group ID)
 ```
 
 Run

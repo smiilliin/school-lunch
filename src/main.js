@@ -6,6 +6,8 @@ const { Writable } = require("stream");
 
 dotenv.config();
 
+const groupID = process.env["GROUP"];
+
 const writeImage = (title, content, date) => {
   return new Promise((resolve) => {
     const image = PImage.make(1080, 1080);
@@ -60,7 +62,9 @@ const intervalCallback = async () => {
   console.log("try fetch");
   const dataCallback = async (data, token) => {
     let filteredArticles = data.articles.filter(
-      (article) => article.local_date_of_pub_date == dateString
+      (article) =>
+        article.local_date_of_pub_date == dateString &&
+        article.group_id == groupID
     );
     console.log(dateString);
     if (filteredArticles.length == 0) {
@@ -138,6 +142,7 @@ const intervalCallback = async () => {
   }
 };
 
+console.log("started school-lunch");
 intervalCallback();
 
 setInterval(intervalCallback, 1000 * 60 * 60);
