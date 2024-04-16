@@ -6,7 +6,7 @@ const { Writable } = require("stream");
 
 dotenv.config();
 
-const groupID = process.env["GROUP"];
+const groupID = Number(process.env["GROUP_ID"]);
 
 const writeImage = (title, content, date) => {
   return new Promise((resolve) => {
