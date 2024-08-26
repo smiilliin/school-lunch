@@ -145,4 +145,4 @@ const intervalCallback = async () => {
 console.log("started school-lunch");
 intervalCallback();
 
-setInterval(intervalCallback, 1000 * 60 * 60);
+setInterval(intervalCallback, 1000 * 60 * 10);
