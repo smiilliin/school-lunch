@@ -46,12 +46,18 @@ const writeImage = (title, content, date) => {
     PImage.encodeJPEGToStream(image, stream);
   });
 };
-const intervalCallback = async () => {
+
+const getDateString = () => {
   const date = new Date(Date.now() + 1000 * 60 * 60 * 2);
   const dateString = `${date.getFullYear()}.${(
     "00" +
     (date.getMonth() + 1)
   ).slice(-2)}.${("00" + date.getDate()).slice(-2)}`;
+  return dateString;
+};
+
+const intervalCallback = async () => {
+  const dateString = getDateString();
 
   if (fs.existsSync("last.txt")) {
     const lastDate = fs.readFileSync("last.txt").toString();
@@ -138,6 +144,9 @@ const intervalCallback = async () => {
       token = data.next_token;
     } catch (err) {
       console.error(err);
+      fs.writeFileSync("last.txt", getDateString());
+      //stop when instagram error occurs
+      break;
     }
   }
 };
