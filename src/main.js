@@ -115,10 +115,18 @@ const intervalCallback = async () => {
       })
     );
 
-    const publishResult = await ig.publish.album({
-      items: items,
-      caption: `급식(${dateString})`,
-    });
+    let publishResult;
+    if (items.length == 1) {
+      publishResult = await ig.publish.photo({
+        file: items[0].file,
+        caption: `급식(${dateString})`,
+      });
+    } else {
+      publishResult = await ig.publish.album({
+        items: items,
+        caption: `급식(${dateString})`,
+      });
+    }
 
     console.log(publishResult);
 
