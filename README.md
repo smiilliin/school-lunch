@@ -16,7 +16,7 @@ Input Instagram account and "아이엠스쿨" school ID, article group id
 ID=(Instagram ID)
 PASSWORD=(Password)
 SCHOOL_ID=(School ID)
-GROUP=(Group ID)
+GROUP_ID=(Group ID)
 ```
 
 Run
